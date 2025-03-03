@@ -86,10 +86,10 @@
       const currentInputs = document.querySelectorAll('[id^="webfile_"]');
       const lastInput = currentInputs[currentInputs.length - 1];
 
-      // Check if the last Webfile Number field is empty
-      if (lastInput.value.trim() === "") {
-        alert("Please complete the current Webfile Number before adding a new one.");
-        return; // Stop execution if the field is empty
+      // Check if the last Webfile Number field is empty or not exactly 12 characters
+      if (lastInput.value.trim().length !== 12) {
+        alert("Please complete the current Webfile Number with exactly 12 characters before adding a new one.");
+        return; // Stop execution if the field is not exactly 12 characters
       }
 
       if (currentInputs.length < 5) {

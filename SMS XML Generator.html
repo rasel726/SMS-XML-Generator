@@ -11,55 +11,56 @@
     <!-- Mobile Number Field -->
     <label>Mobile Number: <input type="text" id="mobileNum" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required></label><br><br>
 
-    <label>Login OTP Code: <input type="text" id="loginOtpCode">
-      <button type="button" onclick="generateOtp('loginOtpCode')">Generate OTP</button>
-    </label><br>
-    <label>Login OTP Date: <input type="date" id="loginOtpDate" onchange="syncDates()">
-    </label>
-    <label>Login OTP Time: <input type="time" id="loginOtpTime" value="15:40">
-    </label><br><br>
-
-    <label>Webfile Number 1: <input type="text" id="webfile_1" maxlength="12" oninput="this.value = this.value.toUpperCase(); updatePaidAmount();">
+    <label>Webfile Number 1: <input type="text" id="webfile_1" maxlength="12" oninput="this.value = this.value.toUpperCase(); updatePaidAmount();" required>
       <button type="button" onclick="addWebfileInput()">+</button>
       <button type="button" onclick="removeWebfileInput()">-</button>
-    </label><br><br>
+    </label><br>
 
     <div id="webfileInputs"></div><br>
 
-    <label>Send OTP Code: <input type="text" id="sendOtpCode">
-      <button type="button" onclick="generateOtp('sendOtpCode')">Generate OTP</button>
+    <label>Appointment Date: <input type="date" id="appointmentDate" required></label>
+    <label>Appointment Time Slot: <input type="text" id="appointmentTime" value="10:00-10:59" required></label><br><br>
+
+    <label>Login OTP Code: <input type="text" id="loginOtpCode" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+      <button type="button" onclick="generateOtp('loginOtpCode')">Generate OTP</button>
     </label><br>
-    <label>Send OTP Date: <input type="date" id="sendOtpDate">
+    <label>Login OTP Date: <input type="date" id="loginOtpDate" onchange="syncDates()" required>
     </label>
-    <label>Send OTP Time: <input type="time" id="sendOtpTime" value="16:10">
+    <label>Login OTP Time: <input type="time" id="loginOtpTime" value="15:40" required>
     </label><br><br>
 
-    <label>Transaction OTP Code: <input type="text" id="txnOtpCode">
+    <label>Send OTP Code: <input type="text" id="sendOtpCode" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+      <button type="button" onclick="generateOtp('sendOtpCode')">Generate OTP</button>
+    </label><br>
+    <label>Send OTP Date: <input type="date" id="sendOtpDate" required>
+    </label>
+    <label>Send OTP Time: <input type="time" id="sendOtpTime" value="16:10" required>
+    </label><br><br>
+
+    <label>Transaction OTP Code: <input type="text" id="txnOtpCode" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
       <button type="button" onclick="generateOtp('txnOtpCode')">Generate OTP</button>
     </label><br>
-    <label>Transaction OTP Date: <input type="date" id="txnOtpDate">
+    <label>Transaction OTP Date: <input type="date" id="txnOtpDate" required>
     </label>
-    <label>Transaction OTP Time: <input type="time" id="txnOtpTime" value="16:12">
+    <label>Transaction OTP Time: <input type="time" id="txnOtpTime" value="16:12" required>
     </label><br><br>
 
     <label>Paid Amount: <input type="text" id="paidAmount" readonly></label><br>
-    <label>Net Balance: <input type="text" id="netBalance">
+    <label>Net Balance: <input type="text" id="netBalance" required>
       <button type="button" onclick="generateRandomBalance()">Generate Random Balance</button>
     </label><br><br>
     
-    <label>Transaction ID: <input type="text" id="txnId">
+    <label>Transaction ID: <input type="text" id="txnId" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
       <button type="button" onclick="generateTransactionId('txnId')">Generate Transaction ID</button>
     </label><br>
-    <label>Paid Message Date: <input type="date" id="paidDate">
+    <label>Paid Message Date: <input type="date" id="paidDate" required>
     </label>
-    <label>Paid Message Time: <input type="time" id="paidTime" value="16:12">
+    <label>Paid Message Time: <input type="time" id="paidTime" value="16:12" required>
     </label><br><br>
 
-    <label>Appointment Date: <input type="date" id="appointmentDate"></label><br>
-    <label>Appointment Time Slot: <input type="text" id="appointmentTime" value="10:00-10:59"></label><br>
-    <label>Congratulations Message Date: <input type="date" id="congratsDate">
+    <label>Congratulations Message Date: <input type="date" id="congratsDate" required>
     </label>
-    <label>Congratulations Message Time: <input type="time" id="congratsTime" value="16:15">
+    <label>Congratulations Message Time: <input type="time" id="congratsTime" value="16:15" required>
     </label><br><br>
 
     <button type="button" onclick="generateXML()">Generate XML</button>
@@ -102,7 +103,7 @@
       if (currentInputs.length < 5) {
         const inputField = document.createElement('div');
         inputField.innerHTML = `  
-          <label>Webfile Number ${currentInputs.length + 1}: <input type="text" id="webfile_${currentInputs.length + 1}" maxlength="12" oninput="this.value = this.value.toUpperCase(); updatePaidAmount();"></label><br><br>
+          <label>Webfile Number ${currentInputs.length + 1}: <input type="text" id="webfile_${currentInputs.length + 1}" maxlength="12" oninput="this.value = this.value.toUpperCase(); updatePaidAmount();" required></label><br><br>
         `;
         document.getElementById('webfileInputs').appendChild(inputField);
         updatePaidAmount(); // Update Paid Amount when a new Webfile is added
@@ -158,6 +159,23 @@
       const mobileNum = document.getElementById('mobileNum').value;
       if (!mobileNum || mobileNum.length !== 11) {
         alert("Please enter a valid 11-digit Applicant Mobile Number.");
+        return;
+      }
+
+      // Check if all required fields are filled
+      const requiredFields = document.querySelectorAll('[required]');
+      let isValid = true;
+      requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+          isValid = false;
+          field.style.border = '1px solid red';
+        } else {
+          field.style.border = '';
+        }
+      });
+
+      if (!isValid) {
+        alert("Please fill all required fields.");
         return;
       }
 

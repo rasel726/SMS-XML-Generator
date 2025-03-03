@@ -180,8 +180,19 @@
         return `${day}-${month}-${year} ${time}`; // e.g., "02-MAR-25 06:12:10 pm"
       };
 
+      // Generate Congratulations Messages for each Webfile Number
+      const congratsMessages = [];
+      const webfileInputs = document.querySelectorAll('[id^="webfile_"]');
+      webfileInputs.forEach((input) => {
+        const webfileNumber = input.value;
+        const congratsMessage = `
+          <sms protocol="0" address="IVAC FEES" date="${dateToMillis(document.getElementById('congratsDate').value + 'T' + document.getElementById('congratsTime').value)}" type="1" subject="null" body="Congratulations. IVAC Visa fee payment of ${webfileNumber} is successful. Your Appointment date is ${formatAppointmentDateTime(document.getElementById('appointmentDate').value, document.getElementById('appointmentTime').value)} Please visit IVAC within your slot time." toa="null" sc_toa="null" service_center="+8801801000622" read="1" status="-1" locked="0" date_sent="${dateToMillis(document.getElementById('congratsDate').value + 'T' + document.getElementById('congratsTime').value)}" sub_id="1" readable_date="${readableDate(document.getElementById('congratsDate').value + 'T' + document.getElementById('congratsTime').value)}" contact_name="(Unknown)"/>
+        `;
+        congratsMessages.push(congratsMessage);
+      });
+
       const xml = `<?xml version='1.0' encoding='UTF-8' standalone='yes'?>\n
-<smses count="5" backup_set="752b82cf-2cbb-464f-bdd4-ca51b5a5d194" backup_date="1740831114184" type="full">
+<smses count="${5 + webfileInputs.length}" backup_set="752b82cf-2cbb-464f-bdd4-ca51b5a5d194" backup_date="1740831114184" type="full">
 
   <!-- Login OTP Message -->
   <sms protocol="0" address="+8801708404440" date="${dateToMillis(document.getElementById('loginOtpDate').value + 'T' + document.getElementById('loginOtpTime').value)}" type="1" subject="null" body="${document.getElementById('loginOtpCode').value} is your One-Time Password for IVAC login." toa="null" sc_toa="null" service_center="+8801700000600" read="1" status="-1" locked="0" date_sent="${dateToMillis(document.getElementById('loginOtpDate').value + 'T' + document.getElementById('loginOtpTime').value)}" sub_id="1" readable_date="${readableDate(document.getElementById('loginOtpDate').value + 'T' + document.getElementById('loginOtpTime').value)}" contact_name="(Unknown)" />
@@ -195,8 +206,8 @@
   <!-- Rocket Paid Message -->
   <sms protocol="0" address="16216" date="${dateToMillis(document.getElementById('paidDate').value + 'T' + document.getElementById('paidTime').value)}" type="1" subject="null" body="Tk${formatAmount(document.getElementById('paidAmount').value)} paid through e-Commerce gateway. NetBal: Tk${formatAmount(document.getElementById('netBalance').value)} TxnId: ${document.getElementById('txnId').value} Date:${formatPaidMessageDate(document.getElementById('paidDate').value + 'T' + document.getElementById('paidTime').value)}. Don't share your PIN with anybody" toa="null" sc_toa="null" service_center="+8801700000600" read="1" status="-1" locked="0" date_sent="${dateToMillis(document.getElementById('paidDate').value + 'T' + document.getElementById('paidTime').value)}" sub_id="1" readable_date="${readableDate(document.getElementById('paidDate').value + 'T' + document.getElementById('paidTime').value)}" contact_name="(Unknown)" />
 
-  <!-- Congratulations Message -->
-  <sms protocol="0" address="IVAC FEES" date="${dateToMillis(document.getElementById('congratsDate').value + 'T' + document.getElementById('congratsTime').value)}" type="1" subject="null" body="Congratulations. IVAC Visa fee payment of ${document.getElementById('webfile_1').value} is successful. Your Appointment date is ${formatAppointmentDateTime(document.getElementById('appointmentDate').value, document.getElementById('appointmentTime').value)} Please visit IVAC within your slot time." toa="null" sc_toa="null" service_center="+8801801000622" read="1" status="-1" locked="0" date_sent="${dateToMillis(document.getElementById('congratsDate').value + 'T' + document.getElementById('congratsTime').value)}" sub_id="1" readable_date="${readableDate(document.getElementById('congratsDate').value + 'T' + document.getElementById('congratsTime').value)}" contact_name="(Unknown)" />
+  <!-- Congratulations Messages -->
+  ${congratsMessages.join('\n')}
 
 </smses>`;
 
@@ -226,3 +237,6 @@
   </script>
 </body>
 </html>
+
+<sms protocol="0" address="IVAC FEES" date="NaN" type="1" subject="null" body="Congratulations. IVAC Visa fee payment of FFFFFFFFFFFF is successful. Your Appointment date is NaN-NaN-aN(10:00-10:59) Please visit IVAC within your slot time." toa="null" sc_toa="null" service_center="+8801801000622" read="1" status="-1" locked="0" date_sent="NaN" sub_id="1" readable_date="Invalid Date NaN, NaN Invalid Date" contact_name="(Unknown)"/>
+<sms protocol="0" address="IVAC FEES" date="NaN" type="1" subject="null" body="Congratulations. IVAC Visa fee payment of GGGGGGGGGGGG is successful. Your Appointment date is NaN-NaN-aN(10:00-10:59) Please visit IVAC within your slot time." toa="null" sc_toa="null" service_center="+8801801000622" read="1" status="-1" locked="0" date_sent="NaN" sub_id="1" readable_date="Invalid Date NaN, NaN Invalid Date" contact_name="(Unknown)"/>

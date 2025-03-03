@@ -43,7 +43,7 @@
     <label>Net Balance: <input type="text" id="netBalance" readonly></label>
     <button type="button" onclick="generateRandomBalance()">Generate Random Balance</button><br><br>
     
-    <label>Transaction ID: <input type="text" maxlength="10" id="txnId">
+    <label>Transaction ID: <input type="text" id="txnId">
       <button type="button" onclick="generateTransactionId('txnId')">Generate Transaction ID</button>
     </label><br>
     <label>Paid Message Date: <input type="date" id="paidDate">
@@ -83,11 +83,19 @@
 
     // Function to dynamically add Webfile input fields
     function addWebfileInput() {
-      const currentInputs = document.querySelectorAll('[id^="webfile_"]').length;
-      if (currentInputs < 5) {
+      const currentInputs = document.querySelectorAll('[id^="webfile_"]');
+      const lastInput = currentInputs[currentInputs.length - 1];
+
+      // Check if the last Webfile Number field is empty
+      if (lastInput.value.trim() === "") {
+        alert("Please complete the current Webfile Number before adding a new one.");
+        return; // Stop execution if the field is empty
+      }
+
+      if (currentInputs.length < 5) {
         const inputField = document.createElement('div');
         inputField.innerHTML = `  
-          <label>Webfile Number ${currentInputs + 1}: <input type="text" id="webfile_${currentInputs + 1}" maxlength="12" oninput="this.value = this.value.toUpperCase(); updatePaidAmount();"></label><br><br>
+          <label>Webfile Number ${currentInputs.length + 1}: <input type="text" id="webfile_${currentInputs.length + 1}" maxlength="12" oninput="this.value = this.value.toUpperCase(); updatePaidAmount();"></label><br><br>
         `;
         document.getElementById('webfileInputs').appendChild(inputField);
         updatePaidAmount(); // Update Paid Amount when a new Webfile is added

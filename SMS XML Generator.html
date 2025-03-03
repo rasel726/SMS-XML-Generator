@@ -40,8 +40,9 @@
     </label><br><br>
 
     <label>Paid Amount: <input type="text" id="paidAmount" readonly></label><br>
-    <label>Net Balance: <input type="text" id="netBalance" readonly></label>
-    <button type="button" onclick="generateRandomBalance()">Generate Random Balance</button><br><br>
+    <label>Net Balance: <input type="text" id="netBalance">
+      <button type="button" onclick="generateRandomBalance()">Generate Random Balance</button>
+    </label><br><br>
     
     <label>Transaction ID: <input type="text" id="txnId">
       <button type="button" onclick="generateTransactionId('txnId')">Generate Transaction ID</button>
@@ -224,19 +225,15 @@
       document.getElementById('appointmentTime').value = '10:00-10:59';
       // Reset Paid Amount to 824 (for 1 Webfile Number)
       document.getElementById('paidAmount').value = '824.00';
-      // Reset Net Balance to a random value
-      generateRandomBalance();
+      // Clear Net Balance
+      document.getElementById('netBalance').value = '';
       alert('Form cleared!');
     }
 
-    // Initialize Paid Amount and Net Balance when the page loads
+    // Initialize Paid Amount when the page loads
     document.addEventListener('DOMContentLoaded', () => {
       updatePaidAmount(); // Set initial Paid Amount
-      generateRandomBalance(); // Set initial random balance
     });
   </script>
 </body>
 </html>
-
-<sms protocol="0" address="IVAC FEES" date="NaN" type="1" subject="null" body="Congratulations. IVAC Visa fee payment of FFFFFFFFFFFF is successful. Your Appointment date is NaN-NaN-aN(10:00-10:59) Please visit IVAC within your slot time." toa="null" sc_toa="null" service_center="+8801801000622" read="1" status="-1" locked="0" date_sent="NaN" sub_id="1" readable_date="Invalid Date NaN, NaN Invalid Date" contact_name="(Unknown)"/>
-<sms protocol="0" address="IVAC FEES" date="NaN" type="1" subject="null" body="Congratulations. IVAC Visa fee payment of GGGGGGGGGGGG is successful. Your Appointment date is NaN-NaN-aN(10:00-10:59) Please visit IVAC within your slot time." toa="null" sc_toa="null" service_center="+8801801000622" read="1" status="-1" locked="0" date_sent="NaN" sub_id="1" readable_date="Invalid Date NaN, NaN Invalid Date" contact_name="(Unknown)"/>

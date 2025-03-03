@@ -11,7 +11,7 @@
     <label>Login OTP Code: <input type="text" id="loginOtpCode">
       <button type="button" onclick="generateOtp('loginOtpCode')">Generate OTP</button>
     </label><br>
-    <label>Login OTP Date: <input type="date" id="loginOtpDate">
+    <label>Login OTP Date: <input type="date" id="loginOtpDate" onchange="syncDates()">
     </label>
     <label>Login OTP Time: <input type="time" id="loginOtpTime" value="15:40">
     </label><br><br>
@@ -34,7 +34,7 @@
     <label>Transaction OTP Code: <input type="text" id="txnOtpCode">
       <button type="button" onclick="generateOtp('txnOtpCode')">Generate OTP</button>
     </label><br>
-    <label>Transaction OTP Date: <input type="date" id="txnOtpDate" onchange="syncPaidMessageDate()">
+    <label>Transaction OTP Date: <input type="date" id="txnOtpDate">
     </label>
     <label>Transaction OTP Time: <input type="time" id="txnOtpTime" value="16:12">
     </label><br><br>
@@ -76,10 +76,13 @@
       document.getElementById(fieldId).value = txnId;
     }
 
-    // Sync Paid Message Date with Transaction OTP Date
-    function syncPaidMessageDate() {
-      const txnOtpDate = document.getElementById('txnOtpDate').value;
-      document.getElementById('paidDate').value = txnOtpDate;
+    // Sync all dates with Login OTP Date
+    function syncDates() {
+      const loginOtpDate = document.getElementById('loginOtpDate').value;
+      document.getElementById('sendOtpDate').value = loginOtpDate;
+      document.getElementById('txnOtpDate').value = loginOtpDate;
+      document.getElementById('paidDate').value = loginOtpDate;
+      document.getElementById('congratsDate').value = loginOtpDate;
     }
 
     // Function to dynamically add Webfile input fields

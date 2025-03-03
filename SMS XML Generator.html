@@ -8,6 +8,9 @@
 <body>
   <h2>SMS XML Generator</h2>
   <form id="smsForm">
+    <!-- Mobile Number Field -->
+    <label>Mobile Number: <input type="text" id="mobileNum" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required></label><br><br>
+
     <label>Login OTP Code: <input type="text" id="loginOtpCode">
       <button type="button" onclick="generateOtp('loginOtpCode')">Generate OTP</button>
     </label><br>
@@ -152,6 +155,12 @@
     };
 
     function generateXML() {
+      const mobileNum = document.getElementById('mobileNum').value;
+      if (!mobileNum || mobileNum.length !== 11) {
+        alert("Please enter a valid 11-digit Applicant Mobile Number.");
+        return;
+      }
+
       const dateToMillis = (dateTime) => new Date(dateTime).getTime();
 
       // Updated readableDate function to format as "Mar 02, 2025 6:14:10 PM"
@@ -218,7 +227,7 @@
       const blob = new Blob([xml], { type: 'application/xml' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = 'sms_backup.xml';
+      link.download = `${mobileNum}.xml`; // Rename file to only the applicant's mobile number
       link.click();
     }
 

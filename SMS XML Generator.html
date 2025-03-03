@@ -179,6 +179,29 @@
         return;
       }
 
+      // Validate OTP fields (must be exactly 6 digits)
+      const otpFields = ['loginOtpCode', 'sendOtpCode', 'txnOtpCode'];
+      for (const fieldId of otpFields) {
+        const fieldValue = document.getElementById(fieldId).value;
+        if (fieldValue.length !== 6) {
+          alert(`Please enter exactly 6 digits for ${fieldId.replace('OtpCode', ' OTP Code')}.`);
+          document.getElementById(fieldId).style.border = '1px solid red';
+          return;
+        } else {
+          document.getElementById(fieldId).style.border = '';
+        }
+      }
+
+      // Validate Transaction ID (must be exactly 10 digits)
+      const txnIdValue = document.getElementById('txnId').value;
+      if (txnIdValue.length !== 10) {
+        alert("Please enter exactly 10 digits for Transaction ID.");
+        document.getElementById('txnId').style.border = '1px solid red';
+        return;
+      } else {
+        document.getElementById('txnId').style.border = '';
+      }
+
       const dateToMillis = (dateTime) => new Date(dateTime).getTime();
 
       // Updated readableDate function to format as "Mar 02, 2025 6:14:10 PM"
@@ -247,6 +270,9 @@
       link.href = URL.createObjectURL(blob);
       link.download = `${mobileNum}.xml`; // Rename file to only the applicant's mobile number
       link.click();
+
+      // Clear the form after generating the XML file
+      clearForm();
     }
 
     function clearForm() {
@@ -257,7 +283,15 @@
       document.getElementById('paidAmount').value = '824.00';
       // Clear Net Balance
       document.getElementById('netBalance').value = '';
-      alert('Form cleared!');
+      // Remove dynamically added Webfile inputs
+      const webfileInputs = document.getElementById('webfileInputs');
+      webfileInputs.innerHTML = '';
+      // Add the first Webfile input back
+      const inputField = document.createElement('div');
+      inputField.innerHTML = `  
+        <label>Webfile Number 1: <input type="text" id="webfile_1" maxlength="12" oninput="this.value = this.value.toUpperCase(); updatePaidAmount();" required></label><br><br>
+      `;
+      webfileInputs.appendChild(inputField);
     }
 
     // Initialize Paid Amount when the page loads

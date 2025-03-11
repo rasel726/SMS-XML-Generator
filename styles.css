@@ -1,0 +1,22 @@
+/* Custom Styles */
+body {
+    background-color: #f8f9fa;
+    font-size: 14px; /* Smaller font size */
+  }
+  
+  .container {
+    max-width: 800px;
+  }
+  
+  .form-control-sm {
+    font-size: 14px; /* Smaller input fields */
+  }
+  
+  .btn-sm {
+    font-size: 12px; /* Smaller buttons */
+  }
+  
+  .input-group-sm > .form-control,
+  .input-group-sm > .btn {
+    padding: 0.25rem 0.5rem; /* Smaller padding for input groups */
+  }

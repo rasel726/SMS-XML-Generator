@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMS XML Generator with Login</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Custom CSS for additional styling */
+    body {
+      background-color: #f8f9fa;
+    }
+
+    .form-container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-container h2 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .form-container label {
+      font-weight: 500;
+    }
+
+    .form-container input[readonly] {
+      background-color: #e9ecef;
+    }
+
+    .webfile-inputs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .webfile-inputs .input-group {
+      flex: 1 1 45%;
+    }
+
+    .btn-generate {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .btn-logout {
+      margin: 20px auto;
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .webfile-inputs .input-group {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Form -->
+  <div id="loginForm" class="form-container">
+    <h2>Login</h2>
+    <form>
+      <div class="mb-3">
+        <label for="loginMobileNum" class="form-label">Mobile Number</label>
+        <input type="text" id="loginMobileNum" class="form-control" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+      </div>
+      <div class="mb-3">
+        <label for="loginPassword" class="form-label">Password</label>
+        <input type="password" id="loginPassword" class="form-control" maxlength="8" required>
+      </div>
+      <button type="button" class="btn btn-primary btn-generate" onclick="validateLogin()">Login</button>
+    </form>
+  </div>
+
+  <!-- SMS XML Generator Form -->
+  <div id="smsForm" class="form-container" style="display: none;">
+    <h2>SMS XML Generator</h2>
+    <form>
+      <!-- Mobile Number Field -->
+      <div class="mb-3">
+        <label for="mobileNum" class="form-label">Mobile Number</label>
+        <input type="text" id="mobileNum" class="form-control" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+      </div>
+
+      <!-- Webfile Number Fields -->
+      <div class="mb-3">
+        <label class="form-label">Webfile Numbers</label>
+        <div id="webfileInputs" class="webfile-inputs">
+          <div class="input-group">
+            <input type="text" id="webfile_1" class="form-control" maxlength="12" oninput="this.value = this.value.toUpperCase(); updatePaidAmount(); validateWebfileLength('webfile_1');" required>
+            <button type="button" class="btn btn-outline-secondary" onclick="addWebfileInput()">+</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="removeWebfileInput()">-</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointment Date and Time -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="appointmentDate" class="form-label">Appointment Date</label>
+          <input type="date" id="appointmentDate" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label for="appointmentTime" class="form-label">Appointment Time Slot</label>
+          <input type="text" id="appointmentTime" class="form-control" value="10:00-10:59" required>
+        </div>
+      </div>
+
+      <!-- Login OTP Section -->
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <label for="loginOtpCode" class="form-label">Login OTP Code</label>
+          <div class="input-group">
+            <input type="text" id="loginOtpCode" class="form-control" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+            <button type="button" class="btn btn-outline-secondary" onclick="generateOtp('loginOtpCode')">Generate</button>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label for="loginOtpDate" class="form-label">Login OTP Date</label>
+          <input type="date" id="loginOtpDate" class="form-control" onchange="syncDates()" required>
+        </div>
+        <div class="col-md-4">
+          <label for="loginOtpTime" class="form-label">Login OTP Time</label>
+          <input type="time" id="loginOtpTime" class="form-control" value="15:40" required>
+        </div>
+      </div>
+
+      <!-- Send OTP Section -->
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <label for="sendOtpCode" class="form-label">Send OTP Code</label>
+          <div class="input-group">
+            <input type="text" id="sendOtpCode" class="form-control" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+            <button type="button" class="btn btn-outline-secondary" onclick="generateOtp('sendOtpCode')">Generate</button>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label for="sendOtpDate" class="form-label">Send OTP Date</label>
+          <input type="date" id="sendOtpDate" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+          <label for="sendOtpTime" class="form-label">Send OTP Time</label>
+          <input type="time" id="sendOtpTime" class="form-control" value="16:10" required>
+        </div>
+      </div>
+
+      <!-- Transaction OTP Section -->
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <label for="txnOtpCode" class="form-label">Transaction OTP Code</label>
+          <div class="input-group">
+            <input type="text" id="txnOtpCode" class="form-control" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+            <button type="button" class="btn btn-outline-secondary" onclick="generateOtp('txnOtpCode')">Generate</button>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label for="txnOtpDate" class="form-label">Transaction OTP Date</label>
+          <input type="date" id="txnOtpDate" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+          <label for="txnOtpTime" class="form-label">Transaction OTP Time</label>
+          <input type="time" id="txnOtpTime" class="form-control" value="16:12" required>
+        </div>
+      </div>
+
+      <!-- Paid Amount and Net Balance -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="paidAmount" class="form-label">Paid Amount</label>
+          <input type="text" id="paidAmount" class="form-control" readonly>
+        </div>
+        <div class="col-md-6">
+          <label for="netBalance" class="form-label">Net Balance</label>
+          <div class="input-group">
+            <input type="text" id="netBalance" class="form-control" required>
+            <button type="button" class="btn btn-outline-secondary" onclick="generateNetBalance()">Generate</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transaction ID and Paid Message -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="txnId" class="form-label">Transaction ID</label>
+          <div class="input-group">
+            <input type="text" id="txnId" class="form-control" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+            <button type="button" class="btn btn-outline-secondary" onclick="generateTransactionId('txnId')">Generate</button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label for="paidDate" class="form-label">Paid Message Date</label>
+          <input type="date" id="paidDate" class="form-control" required>
+        </div>
+      </div>
+
+      <!-- Congratulations Message -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="congratsDate" class="form-label">Congratulations Message Date</label>
+          <input type="date" id="congratsDate" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label for="congratsTime" class="form-label">Congratulations Message Time</label>
+          <input type="time" id="congratsTime" class="form-control" value="16:15" required>
+        </div>
+      </div>
+
+      <!-- Generate XML Button -->
+      <button type="button" class="btn btn-primary btn-generate" onclick="generateXML()">Generate XML</button>
+    </form>
+  </div>
+
+  <!-- Logout Button -->
+  <button id="logoutButton" class="btn btn-danger btn-logout" style="display: none;" onclick="logout()">Logout</button>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Hardcoded valid credentials
+    const validMobileNumber = "01738592726";
+    const validPassword = "admin@25";
+
+    // Check login state on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      if (isLoggedIn === 'true') {
+        // User is logged in, show SMS XML Generator form
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('smsForm').style.display = 'block';
+        document.getElementById('logoutButton').style.display = 'block';
+
+        // Auto-generate OTPs and Transaction ID
+        generateOtp('loginOtpCode');
+        generateOtp('sendOtpCode');
+        generateOtp('txnOtpCode');
+        generateTransactionId('txnId');
+      } else {
+        // User is not logged in, show login form
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('smsForm').style.display = 'none';
+        document.getElementById('logoutButton').style.display = 'none';
+      }
+    });
+
+    // Function to validate login
+    function validateLogin() {
+      const mobileNumber = document.getElementById('loginMobileNum').value;
+      const password = document.getElementById('loginPassword').value;
+
+      // Validate mobile number (must be 11 digits)
+      if (mobileNumber.length !== 11 || !/^\d+$/.test(mobileNumber)) {
+        alert("Please enter a valid 11-digit mobile number.");
+        return;
+      }
+
+      // Validate password (must be 8 characters and contain letters and numbers)
+      if (password.length !== 8 || !/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
+        alert("Password must be 8 characters long and contain both letters and numbers.");
+        return;
+      }
+
+      // Check if credentials match
+      if (mobileNumber === validMobileNumber && password === validPassword) {
+        // Hide login form and show SMS XML Generator form
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('smsForm').style.display = 'block';
+        document.getElementById('logoutButton').style.display = 'block';
+
+        // Save login state in localStorage
+        localStorage.setItem('isLoggedIn', 'true');
+
+        // Auto-generate OTPs and Transaction ID
+        generateOtp('loginOtpCode');
+        generateOtp('sendOtpCode');
+        generateOtp('txnOtpCode');
+        generateTransactionId('txnId');
+      } else {
+        alert("Invalid mobile number or password.");
+      }
+    }
+
+    // Function to logout
+    function logout() {
+      // Show login form and hide SMS XML Generator form
+      document.getElementById('loginForm').style.display = 'block';
+      document.getElementById('smsForm').style.display = 'none';
+      document.getElementById('logoutButton').style.display = 'none';
+
+      // Clear login state in localStorage
+      localStorage.removeItem('isLoggedIn');
+
+      // Clear login form fields
+      document.getElementById('loginMobileNum').value = '';
+      document.getElementById('loginPassword').value = '';
+    }
+
+    // Function to validate Webfile Number length
+    function validateWebfileLength(fieldId) {
+      const webfileInput = document.getElementById(fieldId);
+      if (webfileInput.value.length !== 12) {
+        webfileInput.setCustomValidity("Webfile Number must be exactly 12 characters long.");
+      } else {
+        webfileInput.setCustomValidity("");
+      }
+    }
+
+    // Function to generate random 6-digit OTP
+    function generateOtp(fieldId) {
+      const otp = Math.floor(100000 + Math.random() * 900000); // Generate a random 6-digit number
+      document.getElementById(fieldId).value = otp;
+    }
+
+    // Function to generate random 10-digit Transaction ID
+    function generateTransactionId(fieldId) {
+      const txnId = Math.floor(1000000000 + Math.random() * 9000000000); // Generate a random 10-digit number
+      document.getElementById(fieldId).value = txnId;
+    }
+
+    // Function to generate Net Balance
+    function generateNetBalance() {
+      const paidAmount = parseFloat(document.getElementById('paidAmount').value); // Get Paid Amount
+      if (isNaN(paidAmount)) {
+        alert("Please ensure the Paid Amount is valid.");
+        return;
+      }
+
+      // Example logic: Net Balance = Paid Amount - 100 (you can adjust this logic as needed)
+      const netBalance = paidAmount - 100; // Adjust this formula as per your requirements
+      document.getElementById('netBalance').value = netBalance.toFixed(2); // Set Net Balance
+    }
+
+    // Sync all dates with Login OTP Date
+    function syncDates() {
+      const loginOtpDate = document.getElementById('loginOtpDate').value;
+      document.getElementById('sendOtpDate').value = loginOtpDate;
+      document.getElementById('txnOtpDate').value = loginOtpDate;
+      document.getElementById('paidDate').value = loginOtpDate;
+      document.getElementById('congratsDate').value = loginOtpDate;
+    }
+
+    // Function to dynamically add Webfile input fields
+    function addWebfileInput() {
+      const currentInputs = document.querySelectorAll('[id^="webfile_"]');
+      const lastInput = currentInputs[currentInputs.length - 1];
+
+      // Check if the last Webfile Number field is empty or not exactly 12 characters
+      if (lastInput.value.trim().length !== 12) {
+        alert("Please complete the current Webfile Number with exactly 12 characters before adding a new one.");
+        return; // Stop execution if the field is not exactly 12 characters
+      }
+
+      if (currentInputs.length < 5) {
+        const inputField = document.createElement('div');
+        inputField.className = 'input-group';
+        inputField.innerHTML = `  
+          <input type="text" id="webfile_${currentInputs.length + 1}" class="form-control" maxlength="12" oninput="this.value = this.value.toUpperCase(); updatePaidAmount(); validateWebfileLength('webfile_${currentInputs.length + 1}');" required>
+          <button type="button" class="btn btn-outline-secondary" onclick="addWebfileInput()">+</button>
+          <button type="button" class="btn btn-outline-secondary" onclick="removeWebfileInput()">-</button>
+        `;
+        document.getElementById('webfileInputs').appendChild(inputField);
+        updatePaidAmount(); // Update Paid Amount when a new Webfile is added
+      } else {
+        alert('Maximum 5 Webfile Numbers allowed');
+      }
+    }
+
+    // Function to dynamically remove Webfile input fields
+    function removeWebfileInput() {
+      const currentInputs = document.querySelectorAll('[id^="webfile_"]').length;
+      if (currentInputs > 1) {
+        const webfileInputs = document.getElementById('webfileInputs');
+        webfileInputs.removeChild(webfileInputs.lastChild);
+        updatePaidAmount(); // Update Paid Amount when a Webfile is removed
+      } else {
+        alert('Minimum 1 Webfile Number required');
+      }
+    }
+
+    // Function to update Paid Amount based on the number of Webfile Numbers
+    function updatePaidAmount() {
+      const currentInputs = document.querySelectorAll('[id^="webfile_"]').length;
+      const paidAmount = 824 * currentInputs; // Calculate Paid Amount
+      document.getElementById('paidAmount').value = paidAmount.toFixed(2); // Set Paid Amount
+    }
+
+    // Function to format amount with comma if >= 1000
+    const formatAmount = (amount) => {
+      const numericAmount = parseFloat(amount);
+      if (numericAmount >= 1000) {
+        return numericAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+      return numericAmount.toFixed(2);
+    };
+
+    // Function to format the appointment date and time slot
+    const formatAppointmentDateTime = (date, timeSlot) => {
+      const dateObj = new Date(date);
+      const day = String(dateObj.getDate()).padStart(2, '0'); // e.g., "03"
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0'); // e.g., "03"
+      const year = String(dateObj.getFullYear()).slice(-2); // e.g., "25"
+      return `${day}-${month}-${year}(${timeSlot})`; // e.g., "03-03-25(10:00-10:59)"
+    };
+
+    function generateXML() {
+      const mobileNum = document.getElementById('mobileNum').value;
+      if (!mobileNum || mobileNum.length !== 11) {
+        alert("Please enter a valid 11-digit Applicant Mobile Number.");
+        return;
+      }
+
+      // Check if all required fields are filled
+      const requiredFields = document.querySelectorAll('[required]');
+      let isValid = true;
+      requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+          isValid = false;
+          field.style.border = '1px solid red';
+        } else {
+          field.style.border = '';
+        }
+      });
+
+      if (!isValid) {
+        alert("Please fill all required fields.");
+        return;
+      }
+
+      // Validate OTP fields (must be exactly 6 digits)
+      const otpFields = ['loginOtpCode', 'sendOtpCode', 'txnOtpCode'];
+      for (const fieldId of otpFields) {
+        const fieldValue = document.getElementById(fieldId).value;
+        if (fieldValue.length !== 6) {
+          alert(`Please enter exactly 6 digits for ${fieldId.replace('OtpCode', ' OTP Code')}.`);
+          document.getElementById(fieldId).style.border = '1px solid red';
+          return;
+        } else {
+          document.getElementById(fieldId).style.border = '';
+        }
+      }
+
+      // Validate Transaction ID (must be exactly 10 digits)
+      const txnIdValue = document.getElementById('txnId').value;
+      if (txnIdValue.length !== 10) {
+        alert("Please enter exactly 10 digits for Transaction ID.");
+        document.getElementById('txnId').style.border = '1px solid red';
+        return;
+      } else {
+        document.getElementById('txnId').style.border = '';
+      }
+
+      // Validate Webfile Number fields (must be exactly 12 characters)
+      const webfileInputs = document.querySelectorAll('[id^="webfile_"]');
+      for (const input of webfileInputs) {
+        if (input.value.length !== 12) {
+          alert("All Webfile Numbers must be exactly 12 characters long.");
+          input.style.border = '1px solid red';
+          return;
+        } else {
+          input.style.border = '';
+        }
+      }
+
+      const dateToMillis = (dateTime) => new Date(dateTime).getTime();
+
+      // Updated readableDate function to format as "Mar 02, 2025 6:14:10 PM"
+      const readableDate = (dateTime) => {
+        const date = new Date(dateTime);
+        const month = date.toLocaleString('en-US', { month: 'short' }); // e.g., "Mar"
+        const day = String(date.getDate()).padStart(2, '0'); // Ensure two-digit day, e.g., "02"
+        const year = date.getFullYear(); // e.g., "2025"
+        const time = date.toLocaleTimeString('en-US', {
+          hour: 'numeric', // Use 'numeric' to avoid leading zero
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        }); // e.g., "6:14:10 PM"
+        return `${month} ${day}, ${year} ${time}`; // e.g., "Mar 02, 2025 6:14:10 PM"
+      };
+
+      // Function to format the date as "02-MAR-25 06:12:10 pm"
+      const formatPaidMessageDate = (dateTime) => {
+        const date = new Date(dateTime);
+        const day = String(date.getDate()).padStart(2, '0'); // e.g., "02"
+        const month = date.toLocaleString('en-US', { month: 'short' }).toUpperCase(); // e.g., "MAR"
+        const year = String(date.getFullYear()).slice(-2); // e.g., "25"
+        const time = date.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        }).toLowerCase(); // e.g., "06:12:10 pm"
+        return `${day}-${month}-${year} ${time}`; // e.g., "02-MAR-25 06:12:10 pm"
+      };
+
+      // Generate Congratulations Messages for each Webfile Number
+      const congratsMessages = [];
+      webfileInputs.forEach((input) => {
+        const webfileNumber = input.value;
+        const congratsMessage = `
+          <sms protocol="0" address="IVAC FEES" date="${dateToMillis(document.getElementById('congratsDate').value + 'T' + document.getElementById('congratsTime').value)}" type="1" subject="null" body="Congratulations. IVAC Visa fee payment of ${webfileNumber} is successful. Your Appointment date is ${formatAppointmentDateTime(document.getElementById('appointmentDate').value, document.getElementById('appointmentTime').value)} Please visit IVAC within your slot time." toa="null" sc_toa="null" service_center="+8801801000622" read="1" status="-1" locked="0" date_sent="${dateToMillis(document.getElementById('congratsDate').value + 'T' + document.getElementById('congratsTime').value)}" sub_id="1" readable_date="${readableDate(document.getElementById('congratsDate').value + 'T' + document.getElementById('congratsTime').value)}" contact_name="(Unknown)"/>
+        `;
+        congratsMessages.push(congratsMessage);
+      });
+
+      const xml = `<?xml version='1.0' encoding='UTF-8' standalone='yes'?>\n
+<smses count="${5 + webfileInputs.length}" backup_set="752b82cf-2cbb-464f-bdd4-ca51b5a5d194" backup_date="1740831114184" type="full">
+
+  <!-- Login OTP Message -->
+  <sms protocol="0" address="+8801708404440" date="${dateToMillis(document.getElementById('loginOtpDate').value + 'T' + document.getElementById('loginOtpTime').value)}" type="1" subject="null" body="${document.getElementById('loginOtpCode').value} is your One-Time Password for IVAC login." toa="null" sc_toa="null" service_center="+8801700000600" read="1" status="-1" locked="0" date_sent="${dateToMillis(document.getElementById('loginOtpDate').value + 'T' + document.getElementById('loginOtpTime').value)}" sub_id="1" readable_date="${readableDate(document.getElementById('loginOtpDate').value + 'T' + document.getElementById('loginOtpTime').value)}" contact_name="(Unknown)" />
+
+  <!-- Send OTP Message -->
+  <sms protocol="0" address="+8801708404440" date="${dateToMillis(document.getElementById('sendOtpDate').value + 'T' + document.getElementById('sendOtpTime').value)}" type="1" subject="null" body="${document.getElementById('sendOtpCode').value} is your one time password for verification" toa="null" sc_toa="null" service_center="+8801700000600" read="1" status="-1" locked="0" date_sent="${dateToMillis(document.getElementById('sendOtpDate').value + 'T' + document.getElementById('sendOtpTime').value)}" sub_id="1" readable_date="${readableDate(document.getElementById('sendOtpDate').value + 'T' + document.getElementById('sendOtpTime').value)}" contact_name="(Unknown)" />
+
+  <!-- Rocket Transaction OTP Message -->
+  <sms protocol="0" address="16216" date="${dateToMillis(document.getElementById('txnOtpDate').value + 'T' + document.getElementById('txnOtpTime').value)}" type="1" subject="null" body="Your security code for Rocket transaction is ${document.getElementById('txnOtpCode').value}." toa="null" sc_toa="null" service_center="+8801700000600" read="1" status="-1" locked="0" date_sent="${dateToMillis(document.getElementById('txnOtpDate').value + 'T' + document.getElementById('txnOtpTime').value)}" sub_id="1" readable_date="${readableDate(document.getElementById('txnOtpDate').value + 'T' + document.getElementById('txnOtpTime').value)}" contact_name="(Unknown)" />
+
+  <!-- Rocket Paid Message -->
+  <sms protocol="0" address="16216" date="${dateToMillis(document.getElementById('paidDate').value + 'T' + document.getElementById('paidTime').value)}" type="1" subject="null" body="Tk${formatAmount(document.getElementById('paidAmount').value)} paid through e-Commerce gateway. NetBal: Tk${formatAmount(document.getElementById('netBalance').value)} TxnId: ${document.getElementById('txnId').value} Date:${formatPaidMessageDate(document.getElementById('paidDate').value + 'T' + document.getElementById('paidTime').value)}. Don't share your PIN with anybody" toa="null" sc_toa="null" service_center="+8801700000600" read="1" status="-1" locked="0" date_sent="${dateToMillis(document.getElementById('paidDate').value + 'T' + document.getElementById('paidTime').value)}" sub_id="1" readable_date="${readableDate(document.getElementById('paidDate').value + 'T' + document.getElementById('paidTime').value)}" contact_name="(Unknown)" />
+
+  <!-- Congratulations Messages -->
+  ${congratsMessages.join('\n')}
+
+</smses>`;
+
+      const blob = new Blob([xml], { type: 'application/xml' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${mobileNum}.xml`; // Rename file to only the applicant's mobile number
+      link.click();
+    }
+  </script>
+</body>
+</html>
